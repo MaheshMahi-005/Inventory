@@ -26,6 +26,9 @@ class CategoryResponse(CategoryCreate):
     class Config:
         from_attributes = True
 
+class CategoryUpdate(BaseModel):
+    name: str
+
 class ProductCreate(BaseModel):
     name : str
     description : str
@@ -41,3 +44,10 @@ class ProductResponse(BaseModel):
     category : CategoryResponse
     class Config:
         from_attributes = True
+
+class ProductUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    cost_price: Optional[float] = None
+    category_id: Optional[int] = None
