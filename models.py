@@ -1,4 +1,4 @@
-from sqlalchemy import Column,Integer,Float,String,ForeignKey
+from sqlalchemy import Column,Integer,String,ForeignKey,Numeric
 from sqlalchemy.orm import declarative_base,relationship
 
 Base = declarative_base()
@@ -28,8 +28,8 @@ class Product(Base):
     id =Column (Integer,primary_key=True,index=True)
     name = Column(String(50))
     description = Column(String(100))
-    price =Column(Float)
-    cost_price = Column(Float)
+    price = Column(Numeric(10, 2))
+    cost_price = Column(Numeric(10, 2))
     category_id = Column(Integer,ForeignKey("Categories.id"))
 
     category = relationship('Category',back_populates='products')
