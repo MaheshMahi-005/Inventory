@@ -9,6 +9,7 @@ class User(Base):
     id = Column(Integer,primary_key=True,index=True)
     username = Column(String(100),unique=True)
     password = Column(String(300))
+    role = Column(String(20),default='user',nullable=False)
 
 
 
