@@ -4,7 +4,7 @@ from passlib.context import CryptContext
 from fastapi import Depends,HTTPException,status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from database import session,get_db
+from database import get_db
 from dotenv import load_dotenv
 import models,os
 
@@ -47,3 +47,8 @@ def get_current_user(token:str = Depends(oauth2_schema),db:Session = Depends(get
     if user is None:
         raise credentials_exceptions
     return user
+
+def get_current_admin(current_user:models.User = Depends(get_current_user)):
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail='Admin privileges required')
+    return current_user

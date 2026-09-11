@@ -2,7 +2,7 @@ from fastapi import APIRouter,Depends,HTTPException,status,Query
 from sqlalchemy.orm import Session
 from typing import Optional
 from database import get_db
-from auth import get_current_user
+from auth import get_current_admin
 from schemas import ProductCreate,ProductResponse,ProductUpdate
 import models
 
@@ -31,7 +31,7 @@ def get_product_by_id(id: int, db: Session = Depends(get_db)):
 
 #add product 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=ProductResponse)
-def add_product(product: ProductCreate, db: Session = Depends(get_db),current_user:models.User = Depends(get_current_user)):
+def add_product(product: ProductCreate, db: Session = Depends(get_db),current_user:models.User = Depends(get_current_admin)):
     category = db.query(models.Category).filter(models.Category.id == product.category_id).first()
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"category_id {product.category_id} not found")
@@ -44,11 +44,14 @@ def add_product(product: ProductCreate, db: Session = Depends(get_db),current_us
 
 #update product by id
 @router.put("/{id}", response_model=ProductResponse)
-def update_product(id: int, product: ProductCreate, db: Session = Depends(get_db),current_user:models.User = Depends(get_current_user)):
+def update_product(id: int, product: ProductCreate, db: Session = Depends(get_db),current_user:models.User = Depends(get_current_admin)):
     db_product = db.query(models.Product).filter(models.Product.id == id).first()
     if not db_product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Product_id {id} not found")
+    category =db.query(models.Category).filter(models.Category.id == product.category_id).first()
 
+    if not category:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'category_id:{product.category_id} not found')
     db_product.name = product.name
     db_product.description = product.description
     db_product.price = product.price
@@ -60,7 +63,7 @@ def update_product(id: int, product: ProductCreate, db: Session = Depends(get_db
 
 @router.patch('/{id}', response_model=ProductResponse)
 def partial_update_product(id: int, product: ProductUpdate, db: Session = Depends(get_db),
-                            current_user: models.User = Depends(get_current_user)):
+                            current_user: models.User = Depends(get_current_admin)):
     db_product = db.query(models.Product).filter(models.Product.id == id).first()
     if not db_product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Product_id {id} not found")
@@ -78,10 +81,10 @@ def partial_update_product(id: int, product: ProductUpdate, db: Session = Depend
     return db_product
 
 @router.delete("/{id}")
-def delete_product(id: int, db: Session = Depends(get_db),current_user:models.User = Depends(get_current_user)):
+def delete_product(id: int, db: Session = Depends(get_db),current_user:models.User = Depends(get_current_admin)):
     db_product = db.query(models.Product).filter(models.Product.id == id).first()
     if not db_product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"product_id:{id} not found")
     db.delete(db_product)
     db.commit()
-    return  f"product_id:{id} deleted"
+    return  {"detail":f"product_id:{id} deleted"}
