@@ -51,3 +51,8 @@ class ProductUpdate(BaseModel):
     price: Optional[float] = None
     cost_price: Optional[float] = None
     category_id: Optional[int] = None
+
+
+class ProductListResponse(BaseModel):
+    total:int
+    items:list[ProductResponse]

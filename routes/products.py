@@ -3,12 +3,12 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from database import get_db
 from auth import get_current_admin
-from schemas import ProductCreate,ProductResponse,ProductUpdate
+from schemas import ProductCreate,ProductResponse,ProductUpdate,ProductListResponse
 import models
 
 #get all products
 router = APIRouter(prefix='/products',tags=['products'])
-@router.get('/',response_model=list[ProductResponse])
+@router.get('/',response_model=ProductListResponse)
 def get_all_products(skip:int= Query(0,ge=0),
                      limit:int = Query(10,ge=1,le=20),
                      category_id:Optional[int] = None,  
@@ -19,7 +19,9 @@ def get_all_products(skip:int= Query(0,ge=0),
         query = query.filter(models.Product.category_id == category_id)
     if search:
         query = query.filter(models.Product.name.ilike(f'%{search}%'))
-    return query.offset(skip).limit(limit).all()
+    total = query.count()
+    items = query.offset(skip).limit(limit).all()
+    return {"total":total,"items":items}
 
 #get product by id
 @router.get('/{id}', response_model=ProductResponse)
